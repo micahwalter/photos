@@ -2,6 +2,12 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+
+import * as path from 'path';
+
 
 export class PhotosStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -54,10 +60,30 @@ export class PhotosStack extends Stack {
     // Single DynamoDB table to hold metadata for each image
     // Image document will also beused to store data generated elswhere about each photo
 
+    // dynamodb table for photos
+    const photosTable = new dynamodb.Table(this, 'PhotosTable', {
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.NUMBER },
+      tableName: "photos",
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    // photos lambda function
+    const photosFunction = new lambda.Function(this, 'PhotosFunction', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      handler: 'photos.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../src/photos')),
+    });
+
+    // grant lambda permission to read/write to the dynamodb table
+    photosTable.grantReadWriteData(photosFunction);
+
     // 9 - API Gateway
     // REST API endpoint to fetch info about an image from DynamoDB
     // endpoint to allow updating of metadata
 
+    new apigateway.LambdaRestApi(this, 'photos-apigw', {
+      handler: photosFunction,
+    });
 
   }
 }
