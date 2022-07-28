@@ -1,16 +1,49 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class PhotosStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    // rough out the components here
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'PhotosQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    // 1 - source bucket where original photos will be uploaded
+    // this will be configured with S3 Event notifications for put events
+    // this will also need S3 Event Notifications for delete events
+    // block public access
+
+    // 2 - SNS Topic - PUT Events
+    // this will receive PUT events from source bucket and send messages to:
+    // Lambda for image processing and metadata extraction
+
+    // 3 - SNS Topic - Delete Events
+    // this will send events to Lambda to cleanup target images and DB entries
+
+    // 4 - Lambda - Image Processing
+    // This will use Sharp to create derivitive versions of images and store them in Target bucket
+    // This will also extract metadata and IPTC data via Sharp and store that in DynamoDB
+    // should update or create new record and not overwrite entirely if exists
+
+    // 5 - Lambda - Cleanup
+    // This will delete derivitive image files from target bucket
+    // This will also delete database entry for image
+
+    // 6 - Target bucket
+    // Bucket will be used to hold all derivitive images
+    // block public access
+
+    // 7 - CloudFront Distro
+    // This will use the Target bucket as origin
+    // use origin access identity config
+
+    // 8 - DynamoDB
+    // Single DynamoDB table to hold metadata for each image
+    // Image document will also beused to store data generated elswhere about each photo
+
+    // 9 - API Gateway
+    // REST API endpoint to fetch info about an image from DynamoDB
+    // endpoint to allow updating of metadata
+
+
   }
 }
