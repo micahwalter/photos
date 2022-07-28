@@ -1,6 +1,8 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
+import * as s3 from 'aws-cdk-lib/aws-s3';
+
 export class PhotosStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -11,6 +13,13 @@ export class PhotosStack extends Stack {
     // this will be configured with S3 Event notifications for put events
     // this will also need S3 Event Notifications for delete events
     // block public access
+
+    const sourceBucket = new s3.Bucket(this, 'SourceBucket', {
+      eventBridgeEnabled: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
+    });
 
     // 2 - SNS Topic - PUT Events
     // this will receive PUT events from source bucket and send messages to:
@@ -31,6 +40,11 @@ export class PhotosStack extends Stack {
     // 6 - Target bucket
     // Bucket will be used to hold all derivitive images
     // block public access
+
+    const targetBucket = new s3.Bucket(this, 'TargetBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
 
     // 7 - CloudFront Distro
     // This will use the Target bucket as origin
