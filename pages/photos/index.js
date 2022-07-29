@@ -27,7 +27,9 @@ export default function Home({ data }) {
           photos.
         </h1>
 
-        {data.Items.map(photo => <p>{photo.title}</p>)}
+        {data.Items.map(photo => 
+          <p key={photo.id}>{photo.id} - {photo.title}</p>
+        )}
 
       </main>
       <footer className={styles.footer}>
