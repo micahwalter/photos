@@ -28,7 +28,9 @@ export default function Photos({ data }) {
         </h1>
 
         {data.Items.map(photo => 
-          <p key={photo.id}>{photo.id} - {photo.title}</p>
+          <p key={photo.id}>
+            <Link href={`/photos/${photo.id}`}><a>{photo.id} - {photo.title}</a></Link>
+          </p>
         )}
 
       </main>
