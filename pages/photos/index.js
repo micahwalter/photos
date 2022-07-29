@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export async function getServerSideProps(context) {
   
-  const url = "https://vxel9fe85d.execute-api.us-east-1.amazonaws.com/prod/"
+  const url = "https://frjwl7ccig.execute-api.us-east-1.amazonaws.com/prod"
   
   const res = await fetch(url)
   const data = await res.json()

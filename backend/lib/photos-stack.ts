@@ -63,8 +63,15 @@ export class PhotosStack extends Stack {
     // dynamodb table for photos
     const photosTable = new dynamodb.Table(this, 'PhotosTable', {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.NUMBER },
+      sortKey: {name: 'createdAt', type: dynamodb.AttributeType.NUMBER},
       tableName: "photos",
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    photosTable.addGlobalSecondaryIndex({
+      indexName: 'originalFileObjectKeyIndex',
+      partitionKey: {name: 'originalFileObjectKey', type: dynamodb.AttributeType.STRING},
+      sortKey: {name: 'status', type: dynamodb.AttributeType.STRING},
     });
 
     // photos lambda function
