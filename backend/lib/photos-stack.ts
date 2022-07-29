@@ -5,6 +5,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 
 import * as path from 'path';
 
@@ -55,6 +57,10 @@ export class PhotosStack extends Stack {
     // 7 - CloudFront Distro
     // This will use the Target bucket as origin
     // use origin access identity config
+
+    new cloudfront.Distribution(this, 'photosDist', {
+      defaultBehavior: { origin: new origins.S3Origin(targetBucket) },
+    });
 
     // 8 - DynamoDB
     // Single DynamoDB table to hold metadata for each image
