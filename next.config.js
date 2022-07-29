@@ -4,6 +4,7 @@ const nextConfig = {
   swcMinify: true,
   env: {
     API_ENDPOINT: process.env.API_ENDPOINT,
+    CLOUDFRONT_ENDPOINT: process.env.CLOUDFRONT_ENDPOINT,
   }
 }
 
