@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export async function getServerSideProps(context) {
   
-  const url = "https://vxel9fe85d.execute-api.us-east-1.amazonaws.com/prod/"
+  const url = "https://vxel9fe85d.execute-api.us-east-1.amazonaws.com/prod/" + context.params.id
   
   const res = await fetch(url)
   const data = await res.json()
@@ -13,7 +13,7 @@ export async function getServerSideProps(context) {
   return { props: { data } }
 }
 
-export default function Photos({ data }) {
+export default function Photo({ data }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -27,9 +27,7 @@ export default function Photos({ data }) {
           photos.
         </h1>
 
-        {data.Items.map(photo => 
-          <p key={photo.id}>{photo.id} - {photo.title}</p>
-        )}
+        <p>{data.Item.title}</p>
 
       </main>
       <footer className={styles.footer}>
