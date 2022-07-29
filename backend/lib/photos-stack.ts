@@ -7,6 +7,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 
 import * as path from 'path';
 
@@ -29,17 +31,32 @@ export class PhotosStack extends Stack {
       versioned: true,
     });
 
-    // 2 - SNS Topic - PUT Events
-    // this will receive PUT events from source bucket and send messages to:
-    // Lambda for image processing and metadata extraction
-
-    // 3 - SNS Topic - Delete Events
-    // this will send events to Lambda to cleanup target images and DB entries
-
-    // 4 - Lambda - Image Processing
+    // 2 - Lambda - Image Processing
     // This will use Sharp to create derivitive versions of images and store them in Target bucket
     // This will also extract metadata and IPTC data via Sharp and store that in DynamoDB
     // should update or create new record and not overwrite entirely if exists
+
+    const photoProcessingFunction = new lambda.Function(this, 'PhotoProcessingFunction', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      handler: 'photoProcessing.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoProcessing')),
+    });
+
+    // EventBridge Rule for new or updated objects
+    const putObjectRule = new events.Rule(this, 'putObjectRule', {
+      eventPattern: {
+        source: ["aws.s3"],
+        detailType: ["Object Created"],
+        detail: {
+          bucket: {
+            name: [sourceBucket.bucketName]
+          }
+        }
+      },
+    });
+
+    // EventBridge Target for new and updated objects
+    putObjectRule.addTarget(new targets.LambdaFunction(photoProcessingFunction));
 
     // 5 - Lambda - Cleanup
     // This will delete derivitive image files from target bucket
