@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export async function getServerSideProps(context) {
   
-  const url = "https://frjwl7ccig.execute-api.us-east-1.amazonaws.com/prod" + context.params.id
+  const url = process.env.API_ENDPOINT + context.params.id
   
   const res = await fetch(url)
   const data = await res.json()
