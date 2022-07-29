@@ -17,11 +17,8 @@ export class PhotosStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // rough out the components here
-
     // 1 - source bucket where original photos will be uploaded
-    // this will be configured with S3 Event notifications for put events
-    // this will also need S3 Event Notifications for delete events
+    // this will be configured with S3 EventBridge enabled
     // block public access
 
     const sourceBucket = new s3.Bucket(this, 'SourceBucket', {
@@ -62,6 +59,29 @@ export class PhotosStack extends Stack {
     // This will delete derivitive image files from target bucket
     // This will also delete database entry for image
 
+    const photoCleanupFunction = new lambda.Function(this, 'PhotoCleanupFunction', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      handler: 'photoCleanup.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoCleanup')),
+    });
+
+    // EventBridge Rule for deleted objects
+    const deleteObjectRule = new events.Rule(this, 'deleteObjectRule', {
+      eventPattern: {
+        source: ["aws.s3"],
+        detailType: ["Object Deleted"],
+        detail: {
+          bucket: {
+            name: [sourceBucket.bucketName]
+          }
+        }
+      },
+    });
+
+    // EventBridge Target for deleted objects
+    deleteObjectRule.addTarget(new targets.LambdaFunction(photoCleanupFunction));
+
+
     // 6 - Target bucket
     // Bucket will be used to hold all derivitive images
     // block public access
@@ -90,20 +110,28 @@ export class PhotosStack extends Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
+    // Global Secondary Index so we can look an item up by it's original S3 key
     photosTable.addGlobalSecondaryIndex({
       indexName: 'originalFileObjectKeyIndex',
       partitionKey: {name: 'originalFileObjectKey', type: dynamodb.AttributeType.STRING},
     });
 
-    // photos lambda function
+    // Photos lambda function - fetch info about photos via the API
     const photosFunction = new lambda.Function(this, 'PhotosFunction', {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'photos.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../src/photos')),
     });
 
-    // grant lambda permission to read/write to the dynamodb table
+    // grant lambdas permission to read/write to the dynamodb table
     photosTable.grantReadWriteData(photosFunction);
+    photosTable.grantReadWriteData(photoProcessingFunction);
+    photosTable.grantReadWriteData(photoCleanupFunction);
+
+    // grant lambdas permission to read/write to S3
+    sourceBucket.grantRead(photoProcessingFunction);
+    targetBucket.grantReadWrite(photoProcessingFunction);
+    targetBucket.grantReadWrite(photoCleanupFunction);
 
     // 9 - API Gateway
     // REST API endpoint to fetch info about an image from DynamoDB
