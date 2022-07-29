@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import styles from '../../styles/Home.module.css'
 import Link from 'next/link'
 
 export async function getServerSideProps(context) {
@@ -27,9 +27,7 @@ export default function Home({ data }) {
           photos.
         </h1>
 
-        <p className={styles.description}>
-          You have {data.Count} <Link href="/photos"><a>photos</a></Link> so far.
-        </p>
+        {data.Items.map(photo => <p>{photo.title}</p>)}
 
       </main>
       <footer className={styles.footer}>
