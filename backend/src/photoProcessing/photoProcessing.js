@@ -44,6 +44,9 @@ exports.handler = async (event) => {
     // with naming conventions like
     // <Brooklyn Int>/<Brooklyn Int>_<size>.jpg
 
+    // copy and rename the original file ..
+    
+
     // extract metadata
 
     // extract stats

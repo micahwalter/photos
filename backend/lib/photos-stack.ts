@@ -28,6 +28,15 @@ export class PhotosStack extends Stack {
       versioned: true,
     });
 
+    // 6 - Target bucket
+    // Bucket will be used to hold all derivitive images
+    // block public access
+
+    const targetBucket = new s3.Bucket(this, 'TargetBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
+
     // 2 - Lambda - Image Processing
     // This will use Sharp to create derivitive versions of images and store them in Target bucket
     // This will also extract metadata and IPTC data via Sharp and store that in DynamoDB
@@ -37,6 +46,9 @@ export class PhotosStack extends Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'photoProcessing.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoProcessing')),
+      environment: {
+        "targetBucket": targetBucket.bucketName
+      }
     });
 
     // EventBridge Rule for new or updated objects
@@ -63,6 +75,9 @@ export class PhotosStack extends Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'photoCleanup.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoCleanup')),
+      environment: {
+        "targetBucket": targetBucket.bucketName
+      }
     });
 
     // EventBridge Rule for deleted objects
@@ -80,16 +95,6 @@ export class PhotosStack extends Stack {
 
     // EventBridge Target for deleted objects
     deleteObjectRule.addTarget(new targets.LambdaFunction(photoCleanupFunction));
-
-
-    // 6 - Target bucket
-    // Bucket will be used to hold all derivitive images
-    // block public access
-
-    const targetBucket = new s3.Bucket(this, 'TargetBucket', {
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      encryption: s3.BucketEncryption.S3_MANAGED,
-    });
 
     // 7 - CloudFront Distro
     // This will use the Target bucket as origin
