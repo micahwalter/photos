@@ -42,13 +42,19 @@ export class PhotosStack extends Stack {
     // This will also extract metadata and IPTC data via Sharp and store that in DynamoDB
     // should update or create new record and not overwrite entirely if exists
 
+    // sharp image processing layer
+    const sharpLayer = new lambda.LayerVersion(this, 'sharp-layer', {
+      code: lambda.Code.fromAsset('src/layers/sharp-utils'),
+    });
+
     const photoProcessingFunction = new lambda.Function(this, 'PhotoProcessingFunction', {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'photoProcessing.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoProcessing')),
       environment: {
         "targetBucket": targetBucket.bucketName
-      }
+      },
+      layers: [sharpLayer]
     });
 
     // EventBridge Rule for new or updated objects
