@@ -27,7 +27,13 @@ export default function Photo({ data }) {
           photos.
         </h1>
 
-        <p>{data.Item.title}</p>
+        <p>{data.Item.id}</p>
+
+        <Image
+          src={`${process.env.CLOUDFRONT_ENDPOINT}${data.Item.images.m.key}`}
+          width={data.Item.images.m.width}
+          height={data.Item.images.m.height}
+        />
 
       </main>
       <footer className={styles.footer}>
