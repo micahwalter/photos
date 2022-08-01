@@ -29,7 +29,13 @@ export default function Photos({ data }) {
 
         {data.Items.map(photo => 
           <p key={photo.id}>
-            <Link href={`/photos/${photo.id}`}><a>{photo.id} - {photo.title}</a></Link>
+            <Link href={`/photos/${photo.id}`}><a>
+            <Image
+                src={`${process.env.CLOUDFRONT_ENDPOINT}${photo.images.t.key}`}
+                width={photo.images.t.width}
+                height={photo.images.t.height}
+            />
+            </a></Link>
           </p>
         )}
 
