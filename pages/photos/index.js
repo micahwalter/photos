@@ -14,14 +14,13 @@ export async function getStaticProps(context) {
 
 export default function Photos({ data }) {
   return (
-    <div>
+
+    <>
       <Head>
         <title>photos.</title>
-        <meta name="description" content="Photos" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <div>
         <h1>
           photos.
         </h1>
@@ -37,13 +36,7 @@ export default function Photos({ data }) {
             </a></Link>
           </p>
         )}
-
-      </main>
-      <footer>
-        <Link href="https://www.micahwalter.com">
-          <a>micahwalter.com</a>
-        </Link>      
-      </footer>
-    </div>
-  )
+      </div>
+    </>
+  );
 }

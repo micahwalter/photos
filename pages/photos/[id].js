@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import Link from 'next/link'
 
 export async function getStaticPaths() {
   const url = process.env.API_ENDPOINT
@@ -30,14 +29,14 @@ export async function getStaticProps({ params }) {
 
 export default function Photo({ data }) {
   return (
-    <div>
+    <>
       <Head>
         <title>photos.</title>
         <meta name="description" content="Photos" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <div>
         <h1>
           {data.Item.metadata.iptc.title}
         </h1>
@@ -50,12 +49,7 @@ export default function Photo({ data }) {
           height={data.Item.images.m.height}
         />
 
-      </main>
-      <footer>
-        <Link href="https://www.micahwalter.com">
-          <a>micahwalter.com</a>
-        </Link>      
-      </footer>
-    </div>
-  )
+      </div>
+    </>
+  );
 }

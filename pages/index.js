@@ -13,15 +13,13 @@ export async function getStaticProps(context) {
 
 export default function Home({ data }) {
   return (
-    <div>
+    <>
       <Head>
         <title>photos.</title>
-        <meta name="description" content="Photos" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        <h1 className="text-3xl font-bold underline">
+      <div>
+        <h1>
           photos.
         </h1>
 
@@ -29,12 +27,7 @@ export default function Home({ data }) {
           You have {data.Count} <Link href="/photos"><a>photos</a></Link> so far.
         </p>
 
-      </main>
-      <footer>
-        <Link href="https://www.micahwalter.com">
-          <a>micahwalter.com</a>
-        </Link>      
-      </footer>
-    </div>
-  )
+      </div>
+    </>
+  );
 }
