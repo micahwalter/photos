@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 import * as s3 from 'aws-cdk-lib/aws-s3';
@@ -9,9 +9,11 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as sources from 'aws-cdk-lib/aws-lambda-event-sources';
 
 import * as path from 'path';
 
+const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL || "";
 
 export class PhotosStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -50,6 +52,8 @@ export class PhotosStack extends Stack {
     const photoProcessingFunction = new lambda.Function(this, 'PhotoProcessingFunction', {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'photoProcessing.handler',
+      memorySize: 1024,
+      timeout: Duration.seconds(300),
       code: lambda.Code.fromAsset(path.join(__dirname, '../src/photoProcessing')),
       environment: {
         "targetBucket": targetBucket.bucketName
@@ -119,6 +123,7 @@ export class PhotosStack extends Stack {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.NUMBER },
       tableName: "photos",
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      stream: dynamodb.StreamViewType.NEW_IMAGE,
     });
 
     // Global Secondary Index so we can look an item up by it's original S3 key
@@ -126,6 +131,26 @@ export class PhotosStack extends Stack {
       indexName: 'originalFileObjectKeyIndex',
       partitionKey: {name: 'originalFileObjectKey', type: dynamodb.AttributeType.STRING},
     });
+
+    // lambda function to poll the dynamodb stream and update the deploy hook on vercel
+    const photosTableReadStream = new lambda.Function(this, 'readStream', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      handler: 'photosTableReadStream.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../src/photosTableReadStream')),
+      environment: {
+        "hookURL": VERCEL_DEPLOY_HOOK_URL,
+      }
+    });
+
+    // Write permissions for Lambda
+    photosTable.grantReadWriteData(photosTableReadStream);
+
+    // Event Source Mapping DynamoDB -> Lambda
+    photosTableReadStream.addEventSource(new sources.DynamoEventSource(photosTable, {
+      startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+      batchSize: 10,
+      retryAttempts: 0
+    }));
 
     // Photos lambda function - fetch info about photos via the API
     const photosFunction = new lambda.Function(this, 'PhotosFunction', {
