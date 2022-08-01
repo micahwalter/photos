@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import styles from '../../styles/Home.module.css'
 import Link from 'next/link'
 
 export async function getStaticPaths() {
@@ -31,15 +30,15 @@ export async function getStaticProps({ params }) {
 
 export default function Photo({ data }) {
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>photos.</title>
         <meta name="description" content="Photos" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
+      <main>
+        <h1>
           {data.Item.metadata.iptc.title}
         </h1>
 
@@ -52,7 +51,7 @@ export default function Photo({ data }) {
         />
 
       </main>
-      <footer className={styles.footer}>
+      <footer>
         <Link href="https://www.micahwalter.com">
           <a>micahwalter.com</a>
         </Link>      
