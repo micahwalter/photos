@@ -3,14 +3,30 @@ import Image from 'next/image'
 import styles from '../../styles/Home.module.css'
 import Link from 'next/link'
 
-export async function getServerSideProps(context) {
+export async function getStaticPaths() {
+  const url = process.env.API_ENDPOINT
   
-  const url = process.env.API_ENDPOINT + context.params.id
+  const res = await fetch(url)
+  const photos = await res.json()
+
+  const paths = photos.Items.map((photo) => ({
+    params: { id:  photo.id.toString() },
+  }))
+
+  return { paths, fallback: false }
+}
+
+export async function getStaticProps({ params }) {
+  const url = process.env.API_ENDPOINT + params.id
   
   const res = await fetch(url)
   const data = await res.json()
 
-  return { props: { data } }
+  return {
+    props: {
+      data,
+    },
+  };
 }
 
 export default function Photo({ data }) {

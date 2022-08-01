@@ -3,7 +3,7 @@ import Image from 'next/image'
 import styles from '../../styles/Home.module.css'
 import Link from 'next/link'
 
-export async function getServerSideProps(context) {
+export async function getStaticProps(context) {
   
   const url = process.env.API_ENDPOINT
   
