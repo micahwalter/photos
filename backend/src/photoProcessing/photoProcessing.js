@@ -4,6 +4,8 @@ const s3 = new AWS.S3();
 
 const axios = require('axios').default;
 const sharp = require('sharp');
+const iptc = require('iptc-reader');
+const exif = require('exif-reader');
 
 exports.handler = async (event) => {
     
@@ -55,7 +57,10 @@ exports.handler = async (event) => {
     }
     
     // extract metadata & stats
-    const metadata = await sharp(origimage.Body).metadata();    
+    var metadata = await sharp(origimage.Body).metadata();
+    metadata.iptc = iptc(metadata.iptc);
+    metadata.exif = exif(metadata.exif);
+
     const stats = await sharp(origimage.Body).stats();
     
     // next use sharp to do image processing

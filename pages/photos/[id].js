@@ -40,10 +40,10 @@ export default function Photo({ data }) {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          photos.
+          {data.Item.metadata.iptc.title}
         </h1>
 
-        <p>{data.Item.id}</p>
+        <p>{data.Item.metadata.iptc.caption}</p>
 
         <Image
           src={`${process.env.CLOUDFRONT_ENDPOINT}${data.Item.images.m.key}`}
