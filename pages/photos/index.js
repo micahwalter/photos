@@ -20,7 +20,7 @@ export default function Photos({ data }) {
         <title>photos.</title>
       </Head>
 
-      <div>
+      <div className="flex justify-center items-center h-screen"> 
         <h1>
           photos.
         </h1>
