@@ -18,8 +18,8 @@ export default function Home({ data }) {
         <title>photos.</title>
       </Head>
 
-      <div className="flex justify-center items-center h-screen">
-        <h1>
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl">
           photos.
         </h1>
 
