@@ -36,8 +36,8 @@ export default function Photo({ data }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl">
+      <div className="container">
+        <h1>
           {data.Item.metadata.iptc.title}
         </h1>
 

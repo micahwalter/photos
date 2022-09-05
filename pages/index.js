@@ -18,8 +18,8 @@ export default function Home({ data }) {
         <title>photos.</title>
       </Head>
 
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl">
+      <div className="container">
+        <h1>
           photos.
         </h1>
 
