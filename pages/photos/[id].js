@@ -29,10 +29,10 @@ export async function getStaticProps({ params }) {
 
 export default function Photo({ data }) {
   
-  for (var key in data.Item.metadata.iptc) {
-    console.log("Key: " + key);
-    console.log("Value: " + data.Item.metadata.iptc[key]);
-  }
+  // for (var key in data.Item.metadata.iptc) {
+  //   console.log("Key: " + key);
+  //   console.log("Value: " + data.Item.metadata.iptc[key]);
+  // }
 
   return (
     <>
@@ -62,7 +62,7 @@ export default function Photo({ data }) {
         <pre>
         {JSON.stringify(data.Item.images, null, 4)}
         </pre>
-        
+
         <h1>
           IPTC
         </h1>
